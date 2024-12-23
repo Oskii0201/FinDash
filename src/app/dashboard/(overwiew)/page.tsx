@@ -10,7 +10,7 @@ interface Rate {
 }
 
 export default function DashboardPage() {
-  const [rates, setRates] = useState<Rate[]>([]); // Zdefiniowanie typu
+  const [rates, setRates] = useState<Rate[]>([]);
 
   useEffect(() => {
     const fetchRates = async () => {
