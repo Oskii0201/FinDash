@@ -1,9 +1,9 @@
-import NextAuth from "next-auth";
+import NextAuth, { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import prisma from "@/lib/prisma";
 import { compareSync } from "bcrypt-ts";
 
-const authOptions = {
+const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -20,17 +20,15 @@ const authOptions = {
 
         const user = await prisma.user.findUnique({ where: { email } });
 
-        if (!user) {
+        if (!user || !compareSync(password, user.password)) {
           throw new Error("Nieprawidłowy email lub hasło.");
         }
 
-        const isValidPassword = compareSync(password, user.password);
-
-        if (!isValidPassword) {
-          throw new Error("Nieprawidłowy email lub hasło.");
-        }
-
-        return { id: user.id, name: user.name, email: user.email };
+        return {
+          id: user.id.toString(),
+          name: user.name,
+          email: user.email ?? null, // Obsługa `null`
+        };
       },
     }),
   ],
@@ -43,12 +41,17 @@ const authOptions = {
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
-        token.email = user.email;
+        token.email = user.email ?? undefined;
+        token.name = user.name ?? undefined; // Obsługa `null`
       }
       return token;
     },
     async session({ session, token }) {
-      session.user = token;
+      session.user = {
+        id: token.id,
+        email: token.email,
+        name: token.name ?? undefined, // Obsługa `null`
+      };
       return session;
     },
   },
