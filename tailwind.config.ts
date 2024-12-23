@@ -9,8 +9,24 @@ export default {
   theme: {
     extend: {
       colors: {
-        background: "var(--background)",
-        foreground: "var(--foreground)",
+        lightGray: "var(--background)",
+        darkGray: "var(--foreground)",
+        veryDarkGray: "#1A1A1A",
+        offWhite: "#FFFFFF",
+        darkNavy: "#067BC2",
+        jonquil: "#ECC30B",
+
+        softGreen: "#16a34a",
+        mutedGreen: "#15803d",
+        softRed: "#E74C3C",
+        mutedRed: "#f53925",
+        mutedGold: "#F1C40F",
+
+        hoverLightGray: "#E5E5E5",
+        hoverDarkGray: "#2C2C2C",
+      },
+      fontFamily: {
+        sans: ["var(--font-geist-sans)"],
       },
     },
   },
