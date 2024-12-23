@@ -6,7 +6,7 @@ const Footer = () => {
       <p>
         &copy; {new Date().getFullYear()}{" "}
         <Link
-          href="https://github.com/Oskii0201/fin-dash"
+          href="https://github.com/Oskii0201/FinDash"
           target="_blank"
           rel="noopener noreferrer"
           className="text-jonquil hover:underline"

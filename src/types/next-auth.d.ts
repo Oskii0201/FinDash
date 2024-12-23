@@ -5,6 +5,7 @@ declare module "next-auth" {
     id: string;
     email: string | null;
     name: string | null;
+    profilePicture: string | null;
   }
 
   interface Session extends DefaultSession {
@@ -12,6 +13,7 @@ declare module "next-auth" {
       id: string;
       email: string | undefined;
       name?: string | undefined;
+      profilePicture?: string | null;
     };
   }
 }
@@ -21,5 +23,6 @@ declare module "next-auth/jwt" {
     id: string;
     email: string | undefined;
     name: string | undefined;
+    profilePicture?: string | null;
   }
 }

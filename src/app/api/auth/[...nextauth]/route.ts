@@ -3,7 +3,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import prisma from "@/lib/prisma";
 import { compareSync } from "bcrypt-ts";
 
-const authOptions: NextAuthOptions = {
+export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -27,7 +27,8 @@ const authOptions: NextAuthOptions = {
         return {
           id: user.id.toString(),
           name: user.name,
-          email: user.email ?? null, // Obsługa `null`
+          email: user.email ?? null,
+          profilePicture: user.profilePicture ?? null,
         };
       },
     }),
@@ -42,19 +43,33 @@ const authOptions: NextAuthOptions = {
       if (user) {
         token.id = user.id;
         token.email = user.email ?? undefined;
-        token.name = user.name ?? undefined; // Obsługa `null`
+        token.name = user.name ?? undefined;
+        token.profilePicture = user.profilePicture ?? null;
       }
+
+      if (!token.profilePicture) {
+        const dbUser = await prisma.user.findUnique({
+          where: { id: parseInt(token.id, 10) },
+        });
+
+        if (dbUser) {
+          token.profilePicture = dbUser.profilePicture ?? null;
+        }
+      }
+
       return token;
     },
     async session({ session, token }) {
       session.user = {
         id: token.id,
         email: token.email,
-        name: token.name ?? undefined, // Obsługa `null`
+        name: token.name ?? undefined,
+        profilePicture: token.profilePicture ?? null,
       };
       return session;
     },
   },
+
   secret: process.env.NEXTAUTH_SECRET,
   session: {
     strategy: "jwt",
