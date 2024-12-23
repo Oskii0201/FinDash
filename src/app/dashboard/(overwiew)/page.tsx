@@ -3,8 +3,14 @@
 import { useState, useEffect } from "react";
 import { jsPDF } from "jspdf";
 
+interface Rate {
+  currency: string;
+  rate: number;
+  date: Date;
+}
+
 export default function DashboardPage() {
-  const [rates, setRates] = useState<any[]>([]);
+  const [rates, setRates] = useState<Rate[]>([]); // Zdefiniowanie typu
 
   useEffect(() => {
     const fetchRates = async () => {
