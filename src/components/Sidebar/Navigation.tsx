@@ -34,11 +34,6 @@ const navItems: NavItem[] = [
   { icon: <FaUsers />, label: "Grupy", href: "/dashboard/groups" },
   { icon: <FaBook />, label: "Przedmioty", href: "/dashboard/subjects" },
   { icon: <FaUserTie />, label: "Wykładowcy", href: "/dashboard/lecturers" },
-  {
-    icon: <BsDatabaseFillAdd />,
-    label: "Wgraj dane",
-    href: "/dashboard/uploadData",
-  },
 ];
 
 const Navigation: React.FC<NavigationProps> = ({ onLinkClick }) => {

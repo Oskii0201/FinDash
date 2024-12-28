@@ -1,17 +1,12 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { FaBars } from "react-icons/fa";
 import { IoMdArrowDropdown } from "react-icons/io";
 import { useClickOutside } from "@/hooks/useClickOutside";
 import { signOut, useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 
-interface HeaderProps {
-  onHamburgerClick: () => void;
-}
-
-const Header: React.FC<HeaderProps> = ({ onHamburgerClick }) => {
+const Header: React.FC = () => {
   const [isDropdownOpen, setDropdownOpen] = useState(false);
   const { data: session, status } = useSession();
   const [profilePicture, setProfilePicture] = useState("/default-profile.png");
@@ -41,13 +36,6 @@ const Header: React.FC<HeaderProps> = ({ onHamburgerClick }) => {
   return (
     <header className="flex items-center justify-between bg-lightGray p-4 text-darkGray shadow md:px-6 lg:px-8">
       <div className="flex items-center gap-4">
-        <button
-          onClick={onHamburgerClick}
-          className="text-darkGray md:hidden"
-          aria-label="Open Sidebar"
-        >
-          <FaBars size={24} />
-        </button>
         <h1 className="text-lg font-semibold sm:text-xl md:text-2xl">
           FinDash
         </h1>
@@ -73,6 +61,14 @@ const Header: React.FC<HeaderProps> = ({ onHamburgerClick }) => {
           {isDropdownOpen && (
             <div className="absolute right-0 z-40 mt-2 w-48 rounded bg-white p-2 shadow-lg">
               <ul className="text-sm">
+                <li>
+                  <a
+                    href="/dashboard"
+                    className="block w-full px-4 py-2 text-left hover:bg-gray-100"
+                  >
+                    Dashboard
+                  </a>
+                </li>
                 <li>
                   <Link
                     className="block w-full px-4 py-2 text-left hover:bg-gray-100"
