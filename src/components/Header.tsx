@@ -5,6 +5,7 @@ import { IoMdArrowDropdown } from "react-icons/io";
 import { useClickOutside } from "@/hooks/useClickOutside";
 import { signOut, useSession } from "next-auth/react";
 import Image from "next/image";
+import Link from "next/link";
 
 interface HeaderProps {
   onHamburgerClick: () => void;
@@ -12,9 +13,8 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ onHamburgerClick }) => {
   const [isDropdownOpen, setDropdownOpen] = useState(false);
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const [profilePicture, setProfilePicture] = useState("/default-profile.png");
-
   useEffect(() => {
     const checkFileExists = async () => {
       if (session?.user?.profilePicture) {
@@ -29,9 +29,8 @@ const Header: React.FC<HeaderProps> = ({ onHamburgerClick }) => {
         }
       }
     };
-
     checkFileExists();
-  }, [session]);
+  }, [session, status]);
 
   const closeDropdown = () => setDropdownOpen(false);
   const dropdownRef = useClickOutside(closeDropdown);
@@ -75,20 +74,12 @@ const Header: React.FC<HeaderProps> = ({ onHamburgerClick }) => {
             <div className="absolute right-0 z-40 mt-2 w-48 rounded bg-white p-2 shadow-lg">
               <ul className="text-sm">
                 <li>
-                  <button
+                  <Link
                     className="block w-full px-4 py-2 text-left hover:bg-gray-100"
-                    onClick={() => alert("Przejście do profilu")}
+                    href={"/dashboard/profile"}
                   >
                     Mój profil
-                  </button>
-                </li>
-                <li>
-                  <button
-                    className="block w-full px-4 py-2 text-left hover:bg-gray-100"
-                    onClick={() => alert("Przejście do ustawień")}
-                  >
-                    Ustawienia
-                  </button>
+                  </Link>
                 </li>
                 <li>
                   <button

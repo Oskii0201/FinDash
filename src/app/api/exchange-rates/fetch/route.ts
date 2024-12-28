@@ -28,7 +28,6 @@ export async function GET() {
       return NextResponse.json({ error: "Brak danych." }, { status: 400 });
     }
 
-    // Zapis danych do bazy
     for (const rate of rates) {
       await prisma.exchangeRate.upsert({
         where: { currency_date: { currency: rate.currency, date: rate.date } },

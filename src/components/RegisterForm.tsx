@@ -43,7 +43,7 @@ const RegisterForm = () => {
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Imię"
-          className="text-offWhite w-full rounded-md bg-gray-800 px-10 py-3 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-600"
+          className="w-full rounded-md bg-gray-800 px-10 py-3 text-offWhite placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-600"
           required
         />
       </div>
@@ -55,7 +55,7 @@ const RegisterForm = () => {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="Email"
-          className="text-offWhite w-full rounded-md bg-gray-800 px-10 py-3 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-600"
+          className="w-full rounded-md bg-gray-800 px-10 py-3 text-offWhite placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-600"
           required
         />
       </div>
@@ -63,11 +63,11 @@ const RegisterForm = () => {
       <div className="relative">
         <FaLock className="absolute left-3 top-1/3 text-gray-400" />
         <input
-          type="password"
+          type={showPassword ? "text" : "password"}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           placeholder="Hasło"
-          className="text-offWhite w-full rounded-md bg-gray-800 px-10 py-3 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-600"
+          className="w-full rounded-md bg-gray-800 px-10 py-3 text-offWhite placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-600"
           required
         />
       </div>
@@ -85,7 +85,7 @@ const RegisterForm = () => {
         </div>
         <a
           href="/login"
-          className="hover:text-mutedGreen mt-2 text-center text-sm text-gray-400 hover:underline"
+          className="mt-2 text-center text-sm text-gray-400 hover:text-mutedGreen hover:underline"
         >
           Masz już konto? Zaloguj się!
         </a>

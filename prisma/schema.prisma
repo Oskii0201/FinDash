@@ -20,7 +20,7 @@ model ExchangeRate {
   date      DateTime
   createdAt DateTime @default(now())
 
-  @@unique([currency, date]) // Definicja złożonego klucza unikalnego
+  @@unique([currency, date])
 }
 
 model User {
@@ -28,7 +28,7 @@ model User {
   name           String
   email          String   @unique
   password       String
-  profilePicture String? // Opcjonalne pole na zdjęcie
+  profilePicture String?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 }

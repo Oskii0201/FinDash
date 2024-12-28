@@ -26,7 +26,7 @@ export const Button: React.FC<ButtonProps> = ({
   const colorStyles = {
     green: "bg-mutedGreen hover:bg-softGreen",
     red: "bg-mutedRed hover:bg-softRed",
-    blue: "bg-darkBlue hover:bg-softBlue",
+    blue: "bg-blue-600 hover:bg-blue-500",
   };
   const disabledStyles = "opacity-50 cursor-not-allowed";
 
