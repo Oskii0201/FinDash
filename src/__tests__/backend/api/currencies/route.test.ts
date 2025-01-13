@@ -18,12 +18,13 @@ jest.mock("next/server", () => ({
 const mockNextResponseJson = NextResponse.json as jest.Mock;
 const mockPrismaFindMany = prisma.exchangeRate.findMany as jest.Mock;
 const mockPrismaCount = prisma.exchangeRate.count as jest.Mock;
+
 describe("GET /api/currencies", () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
 
-  it("should return currencies and total count on valid query parameters", async () => {
+  it("should return filtered currencies and total count", async () => {
     const mockCurrencies = [
       { id: 1, date: "2025-01-01", currency: "USD", rate: 3.75 },
       { id: 2, date: "2025-01-02", currency: "EUR", rate: 4.2 },
@@ -33,9 +34,9 @@ describe("GET /api/currencies", () => {
     mockPrismaFindMany.mockResolvedValue(mockCurrencies);
     mockPrismaCount.mockResolvedValue(mockTotal);
 
-    const req = {
-      url: "http://localhost:3000/api/currencies?startDate=2025-01-01&endDate=2025-01-02&page=1&limit=10",
-    } as NextRequest;
+    const req = new Request(
+      "http://localhost:3000/api/currencies?startDate=2025-01-01&endDate=2025-01-02&page=1&limit=10",
+    ) as NextRequest;
 
     await GET(req);
 
@@ -68,10 +69,10 @@ describe("GET /api/currencies", () => {
     });
   });
 
-  it("should return 400 if query parameters are invalid", async () => {
-    const req = {
-      url: "http://localhost:3000/api/currencies?startDate=invalid&endDate=2025-01-02",
-    } as NextRequest;
+  it("should return 400 for invalid query parameters", async () => {
+    const req = new Request(
+      "http://localhost:3000/api/currencies?startDate=invalid&endDate=2025-01-02",
+    ) as NextRequest;
 
     await GET(req);
 
@@ -84,12 +85,43 @@ describe("GET /api/currencies", () => {
     );
   });
 
-  it("should return 500 if prisma.findMany throws an error", async () => {
+  it("should return all currencies if no filters are provided", async () => {
+    const mockCurrencies = [
+      { id: 1, date: "2025-01-01", currency: "USD", rate: 3.75 },
+      { id: 2, date: "2025-01-02", currency: "EUR", rate: 4.2 },
+    ];
+    const mockTotal = 2;
+
+    mockPrismaFindMany.mockResolvedValue(mockCurrencies);
+    mockPrismaCount.mockResolvedValue(mockTotal);
+
+    const req = new Request(
+      "http://localhost:3000/api/currencies",
+    ) as NextRequest;
+
+    await GET(req);
+
+    expect(mockPrismaFindMany).toHaveBeenCalledWith({
+      where: {},
+      orderBy: { date: "asc" },
+      skip: 0,
+      take: 10,
+    });
+
+    expect(mockNextResponseJson).toHaveBeenCalledWith({
+      data: mockCurrencies,
+      total: mockTotal,
+      page: 1,
+      limit: 10,
+    });
+  });
+
+  it("should return 500 if database query fails", async () => {
     mockPrismaFindMany.mockRejectedValue(new Error("Database error"));
 
-    const req = {
-      url: "http://localhost:3000/api/currencies?startDate=2025-01-01&endDate=2025-01-02&page=1&limit=10",
-    } as NextRequest;
+    const req = new Request(
+      "http://localhost:3000/api/currencies?startDate=2025-01-01&endDate=2025-01-02",
+    ) as NextRequest;
 
     await GET(req);
 
@@ -99,7 +131,7 @@ describe("GET /api/currencies", () => {
     );
   });
 
-  it("should handle optional query parameters and use defaults", async () => {
+  it("should handle default pagination when page and limit are not specified", async () => {
     const mockCurrencies = [
       { id: 1, date: "2025-01-01", currency: "USD", rate: 3.75 },
     ];
@@ -108,9 +140,9 @@ describe("GET /api/currencies", () => {
     mockPrismaFindMany.mockResolvedValue(mockCurrencies);
     mockPrismaCount.mockResolvedValue(mockTotal);
 
-    const req = {
-      url: "http://localhost:3000/api/currencies?startDate=2025-01-01&endDate=2025-01-02",
-    } as NextRequest;
+    const req = new Request(
+      "http://localhost:3000/api/currencies?startDate=2025-01-01&endDate=2025-01-02",
+    ) as NextRequest;
 
     await GET(req);
 
@@ -123,13 +155,13 @@ describe("GET /api/currencies", () => {
       },
       orderBy: { date: "asc" },
       skip: 0,
-      take: 10,
+      take: 10, // Default limit
     });
 
     expect(mockNextResponseJson).toHaveBeenCalledWith({
       data: mockCurrencies,
       total: mockTotal,
-      page: 1,
+      page: 1, // Default page
       limit: 10,
     });
   });
