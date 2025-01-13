@@ -29,7 +29,7 @@ export default function DashboardPage() {
       } else {
         setMessage("Błąd podczas pobierania danych.");
       }
-    } catch (error) {
+    } catch {
       setMessage("Nie udało się pobrać danych.");
     } finally {
       setLoading(false);

@@ -41,13 +41,15 @@ describe("saveRatesToDatabase", () => {
   });
 
   it("should skip invalid rates", async () => {
+    console.error = jest.fn();
+
     const rates = [
       { code: "USD", mid: 4.5 },
       { code: "EUR", mid: 4.2 },
-      { code: null as any, mid: null as any },
+      { code: null, mid: null },
     ];
 
-    await saveRatesToDatabase(rates, "2025-01-10");
+    await saveRatesToDatabase(rates as any, "2025-01-10");
 
     expect(prisma.exchangeRate.upsert).toHaveBeenCalledTimes(2);
     expect(console.error).toHaveBeenCalledWith("Invalid rate data:", {

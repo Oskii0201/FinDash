@@ -18,12 +18,10 @@ export async function POST() {
 
     console.log(`Fetched ${rates.length} rates for date ${date}.`);
 
-    // Zapis do bazy danych
     await saveRatesToDatabase(rates, date);
 
     return NextResponse.json({ message: "Currencies fetched and saved" });
   } catch (error) {
-    // Rzutowanie błędu na typ Error
     const errorMessage =
       error instanceof Error ? error.message : "Unknown error";
 

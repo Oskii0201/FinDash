@@ -7,7 +7,7 @@ export async function GET() {
       orderBy: { date: "desc" },
     });
     return NextResponse.json(currencies);
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: "Failed to fetch currencies" },
       { status: 500 },

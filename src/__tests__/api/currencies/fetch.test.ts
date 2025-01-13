@@ -14,16 +14,23 @@ const mockedSaveRatesToDatabase = saveRatesToDatabase as jest.MockedFunction<
 
 jest.mock("next/server", () => ({
   NextResponse: {
-    json: jest.fn((data: any, init?: { status?: number }) => ({
-      json: data,
-      status: init?.status || 200,
-    })),
+    json: jest.fn(
+      (data: Record<string, unknown>, init?: { status?: number }) => ({
+        json: data,
+        status: init?.status || 200,
+      }),
+    ),
   },
 }));
 
 describe("POST /api/currencies/fetch", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.spyOn(console, "error").mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   it("should fetch rates and save them to the database", async () => {
