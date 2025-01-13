@@ -1,88 +1,92 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { jsPDF } from "jspdf";
+import { Button } from "@/components/Button";
 
 interface Rate {
   currency: string;
   rate: number;
-  date: Date;
+  date: string;
 }
 
 export default function DashboardPage() {
+  const [loading, setLoading] = useState(false);
   const [rates, setRates] = useState<Rate[]>([]);
+  const [message, setMessage] = useState("");
 
   useEffect(() => {
-    const fetchRates = async () => {
-      const response = await fetch("/api/exchange-rates/fetch");
-      const data = await response.json();
-      if (response.ok) {
-        setRates(data);
-      }
-    };
-
     fetchRates();
   }, []);
 
-  const exportToPDF = () => {
-    const doc = new jsPDF();
-    doc.setFont("helvetica", "bold");
-    doc.text("Kursy walut", 10, 10);
-
-    doc.setFont("helvetica", "normal");
-    doc.text("Nr", 10, 20);
-    doc.text("Waluta", 30, 20);
-    doc.text("Kurs", 80, 20);
-    doc.text("Data", 120, 20);
-
-    let y = 30;
-    rates.forEach((rate, index) => {
-      doc.text((index + 1).toString(), 10, y);
-      doc.text(rate.currency, 30, y);
-      doc.text(rate.rate.toFixed(2), 80, y);
-      doc.text(new Date(rate.date).toLocaleDateString(), 120, y);
-      y += 10;
-    });
-
-    doc.save("kursy-walut.pdf");
+  const fetchRates = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch("/api/currencies");
+      const data = await response.json();
+      if (response.ok) {
+        setRates(data);
+        setMessage("");
+      } else {
+        setMessage("Błąd podczas pobierania danych.");
+      }
+    } catch {
+      setMessage("Nie udało się pobrać danych.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="p-4 md:p-6 lg:p-8">
-      <h1 className="text-2xl font-bold">Kursy walut</h1>
-      <button
-        onClick={exportToPDF}
-        className="mt-4 rounded bg-blue-500 px-4 py-2 text-white"
-      >
-        Eksportuj do PDF
-      </button>
+      <h1 className="mb-6 text-2xl font-bold">Dashboard - Kursy walut</h1>
+
+      <div className="mb-6 flex flex-col items-start sm:flex-row sm:items-center sm:justify-between">
+        <Button onClick={fetchRates}>
+          {loading ? "Fetching..." : "Pobierz kursy walut"}
+        </Button>
+        {message && <p className="mt-4 text-red-500 sm:mt-0">{message}</p>}
+      </div>
+
       {rates.length === 0 ? (
-        <p>Brak danych do wyświetlenia.</p>
+        <p className="text-gray-500">Brak danych do wyświetlenia.</p>
       ) : (
-        <table className="mt-4 w-full table-auto border-collapse border border-gray-300">
-          <thead>
-            <tr>
-              <th className="border border-gray-300 px-4 py-2">Waluta</th>
-              <th className="border border-gray-300 px-4 py-2">Kurs</th>
-              <th className="border border-gray-300 px-4 py-2">Data</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rates.map((rate, index) => (
-              <tr key={index}>
-                <td className="border border-gray-300 px-4 py-2">
-                  {rate.currency}
-                </td>
-                <td className="border border-gray-300 px-4 py-2">
-                  {rate.rate}
-                </td>
-                <td className="border border-gray-300 px-4 py-2">
-                  {new Date(rate.date).toLocaleDateString()}
-                </td>
+        <div className="overflow-x-auto">
+          <table className="min-w-full table-auto border-collapse rounded-lg border border-gray-300 shadow-lg">
+            <thead className="bg-gray-100">
+              <tr>
+                <th className="border border-gray-300 px-4 py-2 text-left">
+                  Waluta
+                </th>
+                <th className="border border-gray-300 px-4 py-2 text-left">
+                  Kurs
+                </th>
+                <th className="border border-gray-300 px-4 py-2 text-left">
+                  Data
+                </th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {rates.map((rate, index) => (
+                <tr
+                  key={index}
+                  className={`${
+                    index % 2 === 0 ? "bg-white" : "bg-gray-50"
+                  } hover:bg-gray-100`}
+                >
+                  <td className="border border-gray-300 px-4 py-2">
+                    {rate.currency}
+                  </td>
+                  <td className="border border-gray-300 px-4 py-2">
+                    {rate.rate.toFixed(2)}
+                  </td>
+                  <td className="border border-gray-300 px-4 py-2">
+                    {new Date(rate.date).toLocaleDateString()}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );

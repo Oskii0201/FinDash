@@ -11,7 +11,6 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { usePathname } from "next/navigation";
 import React, { JSX } from "react";
-import { BsDatabaseFillAdd } from "react-icons/bs";
 
 type NavItem = {
   icon: JSX.Element;
