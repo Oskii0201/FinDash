@@ -7,7 +7,7 @@ interface FetchCurrenciesParams {
   sortOrder?: "asc" | "desc" | undefined;
 }
 
-interface FetchCurrenciesResponse {
+export interface FetchCurrenciesResponse {
   data: Array<{
     id: number;
     currency: string;
