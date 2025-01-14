@@ -1,93 +1,138 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useEffect, useState, useCallback } from "react";
+import CurrencyTable from "@/components/CurrencyTable";
+import DateRangePicker from "@/components/DateRangePicker";
 import { Button } from "@/components/Button";
+import updateCurrencies from "@/utils/updateCurrencies";
+import fetchCurrencies, {
+  FetchCurrenciesResponse,
+} from "@/utils/fetchCurrencies";
+import { toast } from "react-toastify";
+import { format } from "date-fns";
+import { CurrencyData } from "@/types/types";
 
-interface Rate {
-  currency: string;
-  rate: number;
-  date: string;
-}
+const columns = [
+  {
+    name: "Date",
+    selector: (row: CurrencyData) => format(new Date(row.date), "yyyy-MM-dd"),
+    sortable: true,
+  },
+  {
+    name: "Currency",
+    selector: (row: CurrencyData) => row.currency,
+    sortable: true,
+  },
+  {
+    name: "Rate",
+    selector: (row: CurrencyData) => row.rate.toFixed(2),
+    sortable: true,
+    cell: (row: CurrencyData) => (
+      <div style={{ textAlign: "right" }}>{row.rate.toFixed(2)}</div>
+    ),
+  },
+];
 
-export default function DashboardPage() {
-  const [loading, setLoading] = useState(false);
-  const [rates, setRates] = useState<Rate[]>([]);
-  const [message, setMessage] = useState("");
+export default function Dashboard() {
+  const [dateRange, setDateRange] = useState<{
+    start: Date | null;
+    end: Date | null;
+  }>({ start: null, end: null });
+  const [data, setData] = useState<CurrencyData[]>([]);
+  const [totalRecords, setTotalRecords] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    fetchRates();
-  }, []);
-
-  const fetchRates = async () => {
-    setLoading(true);
+  const handleFetchData = useCallback(async () => {
+    setIsLoading(true);
     try {
-      const response = await fetch("/api/currencies");
-      const data = await response.json();
-      if (response.ok) {
-        setRates(data);
-        setMessage("");
+      const response: FetchCurrenciesResponse = await fetchCurrencies({
+        startDate: dateRange.start
+          ? format(dateRange.start, "yyyy-MM-dd")
+          : undefined,
+        endDate: dateRange.end
+          ? format(dateRange.end, "yyyy-MM-dd")
+          : undefined,
+        page: currentPage,
+        limit: rowsPerPage,
+      });
+      setData(response.data);
+      setTotalRecords(response.total);
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error("Error fetching currencies:", error.message);
       } else {
-        setMessage("Błąd podczas pobierania danych.");
+        console.error("Error fetching currencies:", String(error));
       }
-    } catch {
-      setMessage("Nie udało się pobrać danych.");
+      toast.error("Failed to fetch data.");
     } finally {
-      setLoading(false);
+      setIsLoading(false);
+    }
+  }, [dateRange, currentPage, rowsPerPage]);
+
+  const handleUpdateData = async () => {
+    try {
+      const message = await updateCurrencies();
+      toast.success(message);
+      await handleFetchData();
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error("Error updating currencies:", error.message);
+      } else {
+        console.error("Error updating currencies:", String(error));
+      }
+      toast.error("Failed to update currencies.");
     }
   };
 
-  return (
-    <div className="p-4 md:p-6 lg:p-8">
-      <h1 className="mb-6 text-2xl font-bold">Dashboard - Kursy walut</h1>
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
 
-      <div className="mb-6 flex flex-col items-start sm:flex-row sm:items-center sm:justify-between">
-        <Button onClick={fetchRates}>
-          {loading ? "Fetching..." : "Pobierz kursy walut"}
+  const handleRowsPerPageChange = (newRowsPerPage: number) => {
+    setRowsPerPage(newRowsPerPage);
+    setCurrentPage(1);
+  };
+
+  const handleDateChange = (start: Date | null, end: Date | null) => {
+    setDateRange({ start, end });
+    setCurrentPage(1);
+  };
+
+  useEffect(() => {
+    handleFetchData();
+  }, [handleFetchData]);
+
+  return (
+    <div className="container mx-auto flex-col gap-4">
+      <h1 className="mb-4 text-2xl font-bold">Currency Rates Dashboard</h1>
+      <div className="mb-4 flex flex-col items-start justify-start gap-4 md:flex-row md:items-center md:justify-between">
+        <DateRangePicker
+          startDate={dateRange.start}
+          endDate={dateRange.end}
+          onDateChange={handleDateChange}
+        />
+        <Button
+          width="w-fit"
+          color="blue"
+          additionalClasses="h-fit"
+          onClick={handleUpdateData}
+        >
+          Fetch Currencies
         </Button>
-        {message && <p className="mt-4 text-red-500 sm:mt-0">{message}</p>}
       </div>
 
-      {rates.length === 0 ? (
-        <p className="text-gray-500">Brak danych do wyświetlenia.</p>
-      ) : (
-        <div className="overflow-x-auto">
-          <table className="min-w-full table-auto border-collapse rounded-lg border border-gray-300 shadow-lg">
-            <thead className="bg-gray-100">
-              <tr>
-                <th className="border border-gray-300 px-4 py-2 text-left">
-                  Waluta
-                </th>
-                <th className="border border-gray-300 px-4 py-2 text-left">
-                  Kurs
-                </th>
-                <th className="border border-gray-300 px-4 py-2 text-left">
-                  Data
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {rates.map((rate, index) => (
-                <tr
-                  key={index}
-                  className={`${
-                    index % 2 === 0 ? "bg-white" : "bg-gray-50"
-                  } hover:bg-gray-100`}
-                >
-                  <td className="border border-gray-300 px-4 py-2">
-                    {rate.currency}
-                  </td>
-                  <td className="border border-gray-300 px-4 py-2">
-                    {rate.rate.toFixed(2)}
-                  </td>
-                  <td className="border border-gray-300 px-4 py-2">
-                    {new Date(rate.date).toLocaleDateString()}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+      <CurrencyTable
+        data={data}
+        columns={columns}
+        totalRecords={totalRecords}
+        currentPage={currentPage}
+        rowsPerPage={rowsPerPage}
+        isLoading={isLoading}
+        onPageChange={handlePageChange}
+        onRowsPerPageChange={handleRowsPerPageChange}
+      />
     </div>
   );
 }
