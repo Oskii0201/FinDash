@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { z } from "zod";
 
-// Schema walidacji zapytań
 const querySchema = z.object({
   startDate: z
     .string()
@@ -16,7 +15,7 @@ const querySchema = z.object({
     .refine((val) => !val || !isNaN(Date.parse(val)), {
       message: "Invalid endDate format. Expected YYYY-MM-DD.",
     }),
-  currency: z.string().optional(), // Filtracja po kodzie waluty
+  currency: z.string().optional(),
   page: z
     .string()
     .optional()
@@ -29,7 +28,14 @@ const querySchema = z.object({
     .transform((val) => parseInt(val, 10)),
 });
 
-// Funkcja pobierająca dane z bazy
+interface WhereCondition {
+  date?: {
+    gte?: Date;
+    lte?: Date;
+  };
+  currency?: string;
+}
+
 async function fetchCurrencies({
   startDate,
   endDate,
@@ -45,9 +51,8 @@ async function fetchCurrencies({
 }) {
   const offset = (page - 1) * limit;
 
-  const where: any = {}; // Warunki filtrowania
+  const where: WhereCondition = {};
 
-  // Dodanie filtrów do warunku
   if (startDate) where.date = { ...where.date, gte: startDate };
   if (endDate) where.date = { ...where.date, lte: endDate };
   if (currency) where.currency = currency;
@@ -65,7 +70,6 @@ async function fetchCurrencies({
   return { currencies, total };
 }
 
-// Główny handler GET
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
