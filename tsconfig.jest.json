@@ -18,5 +18,5 @@
     }
   },
   "include": ["__tests__/**/*.ts", "__tests__/**/*.tsx"],
-  "exclude": ["node_modules", ".next", "src/app/api"]
+  "exclude": ["node_modules", ".next"]
 }

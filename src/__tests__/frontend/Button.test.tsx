@@ -9,7 +9,7 @@ describe("Button component", () => {
     const button = screen.getByRole("button", { name: /click me/i });
     expect(button).toBeInTheDocument();
     expect(button).toHaveClass(
-      "rounded-md px-6 py-3 font-semibold text-offWhite transition-colors text-center w-full bg-mutedGreen hover:bg-softGreen",
+      "rounded-md px-4 py-2 font-semibold text-offWhite transition-colors text-center w-full bg-mutedGreen hover:bg-softGreen",
     );
   });
 

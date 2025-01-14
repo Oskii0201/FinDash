@@ -16,8 +16,8 @@ function Layout({ children }: LayoutProps) {
         <div className="flex flex-1 flex-col">
           <Header />
           <Suspense fallback={<Loading />}>
-            <main className="flex-1 p-4 md:p-6">
-              <div className="w-full max-w-screen-2xl">{children}</div>
+            <main className="flex-1 p-2 md:p-6">
+              <div className="mx-auto w-full max-w-screen-xl">{children}</div>
             </main>
           </Suspense>
         </div>
