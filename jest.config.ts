@@ -13,10 +13,10 @@ const config: Config = {
   },
   moduleNameMapper: {
     "^@/(.*)$": "<rootDir>/src/$1",
-    "\\.(css|scss|sass)$": "identity-obj-proxy",
+    "\\.(css|less|scss|sass)$": "identity-obj-proxy",
   },
-  setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"], // Setup dla frontendowych testów
-  testMatch: ["<rootDir>/src/__tests__/frontend/**/*.test.{ts,tsx}"], // Ścieżki do testów frontendowych
+  setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"],
+  testMatch: ["<rootDir>/src/__tests__/frontend/**/*.test.{ts,tsx}"],
   testPathIgnorePatterns: ["/node_modules/", "/.next/"],
   coverageDirectory: "./coverage/frontend",
   collectCoverageFrom: [
