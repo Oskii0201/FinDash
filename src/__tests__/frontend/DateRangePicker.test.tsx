@@ -25,10 +25,10 @@ describe("DateRangePicker", () => {
     expect(screen.getByLabelText("Start Date")).toBeInTheDocument();
     expect(screen.getByLabelText("End Date")).toBeInTheDocument();
     expect(screen.getByPlaceholderText("Select start date")).toHaveValue(
-      "01/01/2025",
+      "2025/01/01",
     );
     expect(screen.getByPlaceholderText("Select end date")).toHaveValue(
-      "01/31/2025",
+      "2025/01/31",
     );
   });
 
@@ -64,10 +64,10 @@ describe("DateRangePicker", () => {
     );
 
     expect(screen.getByPlaceholderText("Select start date")).toHaveValue(
-      "02/01/2025",
+      "2025/02/01",
     );
     expect(screen.getByPlaceholderText("Select end date")).toHaveValue(
-      "02/28/2025",
+      "2025/02/28",
     );
   });
 });
