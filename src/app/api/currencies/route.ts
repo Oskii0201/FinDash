@@ -69,10 +69,14 @@ async function fetchCurrencies({
     prisma.exchangeRate.count({ where }),
   ]);
 
-  return { currencies, total };
+  const formattedCurrencies = currencies.map((currency) => ({
+    ...currency,
+    date: currency.date.toISOString(),
+  }));
+
+  return { currencies: formattedCurrencies, total };
 }
 
-// Funkcja grupująca dane
 function groupData(
   data: CurrencyData[],
   type: "year" | "quarter" | "month" | "day",
@@ -127,7 +131,8 @@ export async function GET(req: NextRequest) {
       limit,
     });
 
-    let groupedData = currencies;
+    let groupedData: CurrencyData[] | Record<string, CurrencyData[]> =
+      currencies;
 
     if (grouping) {
       groupedData = groupData(currencies, grouping);
