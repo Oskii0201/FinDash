@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { hashSync } from "bcrypt-ts";
+import { hashSync } from "bcrypt";
 import prisma from "@/lib/prisma";
 
 export async function POST(request: Request) {
@@ -22,15 +22,18 @@ export async function POST(request: Request) {
       );
     }
 
-    const hashedPassword = hashSync(password);
+    const hashedPassword = hashSync(password, 10);
     const user = await prisma.user.create({
       data: { name, email, password: hashedPassword },
     });
 
-    return NextResponse.json({
-      message: "Użytkownik zarejestrowany pomyślnie!",
-      user,
-    });
+    return NextResponse.json(
+      {
+        message: "Użytkownik zarejestrowany pomyślnie!",
+        user,
+      },
+      { status: 200 },
+    );
   } catch (error) {
     console.error("Błąd podczas rejestracji:", error);
     return NextResponse.json(
