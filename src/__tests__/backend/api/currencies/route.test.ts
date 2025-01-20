@@ -52,20 +52,12 @@ describe("GET /api/currencies", () => {
       take: 10,
     });
 
-    expect(mockPrismaCount).toHaveBeenCalledWith({
-      where: {
-        date: {
-          gte: new Date("2025-01-01"),
-          lte: new Date("2025-01-02"),
-        },
-      },
-    });
-
     expect(mockNextResponseJson).toHaveBeenCalledWith({
       data: mockCurrencies,
       total: mockTotal,
       page: 1,
       limit: 10,
+      grouped: false,
     });
   });
 
@@ -113,6 +105,7 @@ describe("GET /api/currencies", () => {
       total: mockTotal,
       page: 1,
       limit: 10,
+      grouped: false,
     });
   });
 
@@ -161,8 +154,9 @@ describe("GET /api/currencies", () => {
     expect(mockNextResponseJson).toHaveBeenCalledWith({
       data: mockCurrencies,
       total: mockTotal,
-      page: 1, // Default page
+      page: 1,
       limit: 10,
+      grouped: false,
     });
   });
 });

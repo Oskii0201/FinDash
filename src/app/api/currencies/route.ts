@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { z } from "zod";
+import { CurrencyData } from "@/types/types";
 
 const querySchema = z.object({
   startDate: z
@@ -16,6 +17,7 @@ const querySchema = z.object({
       message: "Invalid endDate format. Expected YYYY-MM-DD.",
     }),
   currency: z.string().optional(),
+  grouping: z.enum(["year", "quarter", "month", "day"]).optional(), // Nowy parametr
   page: z
     .string()
     .optional()
@@ -70,6 +72,44 @@ async function fetchCurrencies({
   return { currencies, total };
 }
 
+// Funkcja grupująca dane
+function groupData(
+  data: CurrencyData[],
+  type: "year" | "quarter" | "month" | "day",
+) {
+  if (!data || data.length === 0) return {};
+
+  return data.reduce(
+    (acc, item) => {
+      const date = new Date(item.date);
+      let key;
+
+      switch (type) {
+        case "year":
+          key = date.getFullYear().toString();
+          break;
+        case "quarter":
+          key = `${date.getFullYear()}-Q${Math.ceil((date.getMonth() + 1) / 3)}`;
+          break;
+        case "month":
+          key = `${date.getFullYear()}-${(date.getMonth() + 1)
+            .toString()
+            .padStart(2, "0")}`;
+          break;
+        case "day":
+          key = item.date;
+          break;
+      }
+
+      if (!acc[key]) acc[key] = [];
+      acc[key].push(item);
+
+      return acc;
+    },
+    {} as Record<string, CurrencyData[]>,
+  );
+}
+
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
@@ -77,7 +117,7 @@ export async function GET(req: NextRequest) {
       Object.fromEntries(searchParams.entries()),
     );
 
-    const { startDate, endDate, currency, page, limit } = params;
+    const { startDate, endDate, currency, page, limit, grouping } = params;
 
     const { currencies, total } = await fetchCurrencies({
       startDate: startDate ? new Date(startDate) : undefined,
@@ -87,11 +127,18 @@ export async function GET(req: NextRequest) {
       limit,
     });
 
+    let groupedData = currencies;
+
+    if (grouping) {
+      groupedData = groupData(currencies, grouping);
+    }
+
     return NextResponse.json({
-      data: currencies,
+      data: groupedData,
       total,
       page,
       limit,
+      grouped: !!grouping,
     });
   } catch (error) {
     console.error("Error in GET /api/currencies:", error);

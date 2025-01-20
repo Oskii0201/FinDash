@@ -8,6 +8,14 @@ const mockData: CurrencyData[] = [
   { id: 2, date: "2025-01-02", currency: "EUR", rate: 4.2 },
 ];
 
+const mockGroupedData = {
+  "2025": [
+    { id: 1, date: "2025-01-01", currency: "USD", rate: 3.75 },
+    { id: 2, date: "2025-01-02", currency: "EUR", rate: 4.2 },
+  ],
+  "2024": [{ id: 3, date: "2024-12-31", currency: "GBP", rate: 4.1 }],
+};
+
 const mockColumns = [
   { name: "Date", selector: (row: CurrencyData) => row.date, sortable: true },
   {
@@ -26,7 +34,10 @@ describe("CurrencyTable", () => {
   const mockOnPageChange = jest.fn();
   const mockOnRowsPerPageChange = jest.fn();
 
-  const setup = (isLoading = false, data = mockData) =>
+  const setup = (
+    isLoading = false,
+    data: CurrencyData[] | Record<string, CurrencyData[]> = mockData,
+  ) =>
     render(
       <CurrencyTable
         data={data}
@@ -50,6 +61,15 @@ describe("CurrencyTable", () => {
     expect(screen.getByText("2025-01-01")).toBeInTheDocument();
     expect(screen.getByText("USD")).toBeInTheDocument();
     expect(screen.getByText("3.75")).toBeInTheDocument();
+  });
+
+  it("renders table with grouped data and group headers", () => {
+    setup(false, mockGroupedData);
+
+    expect(screen.getByText("2025")).toBeInTheDocument();
+    expect(screen.getByText("2024")).toBeInTheDocument();
+    expect(screen.getByText("2025-01-01")).toBeInTheDocument();
+    expect(screen.getByText("GBP")).toBeInTheDocument();
   });
 
   it("shows loading state", () => {
@@ -81,6 +101,14 @@ describe("CurrencyTable", () => {
 
   it("handles empty data", () => {
     setup(false, []);
+
+    expect(
+      screen.getByText(/There are no records to display/i),
+    ).toBeInTheDocument();
+  });
+
+  it("handles empty grouped data", () => {
+    setup(false, {});
 
     expect(
       screen.getByText(/There are no records to display/i),
