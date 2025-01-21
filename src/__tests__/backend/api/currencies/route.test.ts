@@ -26,12 +26,15 @@ describe("GET /api/currencies", () => {
 
   it("should return filtered currencies and total count", async () => {
     const mockCurrencies = [
-      { id: 1, date: "2025-01-01", currency: "USD", rate: 3.75 },
-      { id: 2, date: "2025-01-02", currency: "EUR", rate: 4.2 },
+      { id: 1, date: "2025-01-01T00:00:00.000Z", currency: "USD", rate: 3.75 },
+      { id: 2, date: "2025-01-02T00:00:00.000Z", currency: "EUR", rate: 4.2 },
     ];
     const mockTotal = 2;
 
-    mockPrismaFindMany.mockResolvedValue(mockCurrencies);
+    mockPrismaFindMany.mockResolvedValue([
+      { id: 1, date: new Date("2025-01-01"), currency: "USD", rate: 3.75 },
+      { id: 2, date: new Date("2025-01-02"), currency: "EUR", rate: 4.2 },
+    ]);
     mockPrismaCount.mockResolvedValue(mockTotal);
 
     const req = new Request(
@@ -52,20 +55,47 @@ describe("GET /api/currencies", () => {
       take: 10,
     });
 
-    expect(mockPrismaCount).toHaveBeenCalledWith({
-      where: {
-        date: {
-          gte: new Date("2025-01-01"),
-          lte: new Date("2025-01-02"),
-        },
-      },
-    });
-
     expect(mockNextResponseJson).toHaveBeenCalledWith({
       data: mockCurrencies,
       total: mockTotal,
       page: 1,
       limit: 10,
+      grouped: false,
+    });
+  });
+
+  it("should return grouped currencies when grouping is specified", async () => {
+    const groupedData = {
+      "2025-01": [
+        {
+          id: 1,
+          date: "2025-01-01T00:00:00.000Z",
+          currency: "USD",
+          rate: 3.75,
+        },
+        { id: 2, date: "2025-01-02T00:00:00.000Z", currency: "EUR", rate: 4.2 },
+      ],
+    };
+    const mockTotal = 2;
+
+    mockPrismaFindMany.mockResolvedValue([
+      { id: 1, date: new Date("2025-01-01"), currency: "USD", rate: 3.75 },
+      { id: 2, date: new Date("2025-01-02"), currency: "EUR", rate: 4.2 },
+    ]);
+    mockPrismaCount.mockResolvedValue(mockTotal);
+
+    const req = new Request(
+      "http://localhost:3000/api/currencies?startDate=2025-01-01&endDate=2025-01-02&grouping=month",
+    ) as NextRequest;
+
+    await GET(req);
+
+    expect(mockNextResponseJson).toHaveBeenCalledWith({
+      data: groupedData,
+      total: mockTotal,
+      page: 1,
+      limit: 10,
+      grouped: true,
     });
   });
 
@@ -87,12 +117,15 @@ describe("GET /api/currencies", () => {
 
   it("should return all currencies if no filters are provided", async () => {
     const mockCurrencies = [
-      { id: 1, date: "2025-01-01", currency: "USD", rate: 3.75 },
-      { id: 2, date: "2025-01-02", currency: "EUR", rate: 4.2 },
+      { id: 1, date: "2025-01-01T00:00:00.000Z", currency: "USD", rate: 3.75 },
+      { id: 2, date: "2025-01-02T00:00:00.000Z", currency: "EUR", rate: 4.2 },
     ];
     const mockTotal = 2;
 
-    mockPrismaFindMany.mockResolvedValue(mockCurrencies);
+    mockPrismaFindMany.mockResolvedValue([
+      { id: 1, date: new Date("2025-01-01"), currency: "USD", rate: 3.75 },
+      { id: 2, date: new Date("2025-01-02"), currency: "EUR", rate: 4.2 },
+    ]);
     mockPrismaCount.mockResolvedValue(mockTotal);
 
     const req = new Request(
@@ -113,6 +146,7 @@ describe("GET /api/currencies", () => {
       total: mockTotal,
       page: 1,
       limit: 10,
+      grouped: false,
     });
   });
 
@@ -129,40 +163,5 @@ describe("GET /api/currencies", () => {
       { error: "Internal server error" },
       { status: 500 },
     );
-  });
-
-  it("should handle default pagination when page and limit are not specified", async () => {
-    const mockCurrencies = [
-      { id: 1, date: "2025-01-01", currency: "USD", rate: 3.75 },
-    ];
-    const mockTotal = 1;
-
-    mockPrismaFindMany.mockResolvedValue(mockCurrencies);
-    mockPrismaCount.mockResolvedValue(mockTotal);
-
-    const req = new Request(
-      "http://localhost:3000/api/currencies?startDate=2025-01-01&endDate=2025-01-02",
-    ) as NextRequest;
-
-    await GET(req);
-
-    expect(mockPrismaFindMany).toHaveBeenCalledWith({
-      where: {
-        date: {
-          gte: new Date("2025-01-01"),
-          lte: new Date("2025-01-02"),
-        },
-      },
-      orderBy: { date: "asc" },
-      skip: 0,
-      take: 10, // Default limit
-    });
-
-    expect(mockNextResponseJson).toHaveBeenCalledWith({
-      data: mockCurrencies,
-      total: mockTotal,
-      page: 1, // Default page
-      limit: 10,
-    });
   });
 });

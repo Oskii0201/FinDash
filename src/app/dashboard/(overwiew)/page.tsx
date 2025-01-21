@@ -38,7 +38,14 @@ export default function Dashboard() {
     start: Date | null;
     end: Date | null;
   }>({ start: null, end: null });
-  const [data, setData] = useState<CurrencyData[]>([]);
+
+  const [grouping, setGrouping] = useState<
+    "year" | "quarter" | "month" | "day" | ""
+  >("");
+
+  const [data, setData] = useState<
+    CurrencyData[] | Record<string, CurrencyData[]>
+  >([]);
   const [totalRecords, setTotalRecords] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -54,6 +61,7 @@ export default function Dashboard() {
         endDate: dateRange.end
           ? format(dateRange.end, "yyyy-MM-dd")
           : undefined,
+        grouping: grouping || undefined,
         page: currentPage,
         limit: rowsPerPage,
       });
@@ -69,7 +77,7 @@ export default function Dashboard() {
     } finally {
       setIsLoading(false);
     }
-  }, [dateRange, currentPage, rowsPerPage]);
+  }, [dateRange, grouping, currentPage, rowsPerPage]);
 
   const handleUpdateData = async () => {
     try {
@@ -97,6 +105,13 @@ export default function Dashboard() {
 
   const handleDateChange = (start: Date | null, end: Date | null) => {
     setDateRange({ start, end });
+    setGrouping("");
+    setCurrentPage(1);
+  };
+
+  const handleGroupingChange = (value: string) => {
+    setGrouping(value as "year" | "quarter" | "month" | "day");
+    setDateRange({ start: null, end: null });
     setCurrentPage(1);
   };
 
@@ -113,6 +128,26 @@ export default function Dashboard() {
           endDate={dateRange.end}
           onDateChange={handleDateChange}
         />
+        <div className="flex items-center gap-4">
+          <label
+            htmlFor="grouping"
+            className="text-sm font-medium text-gray-700"
+          >
+            Group by:
+          </label>
+          <select
+            id="grouping"
+            value={grouping}
+            onChange={(e) => handleGroupingChange(e.target.value)}
+            className="rounded border px-2 py-1 text-sm"
+          >
+            <option value="">None</option>
+            <option value="year">Year</option>
+            <option value="quarter">Quarter</option>
+            <option value="month">Month</option>
+            <option value="day">Day</option>
+          </select>
+        </div>
         <Button
           width="w-fit"
           color="blue"

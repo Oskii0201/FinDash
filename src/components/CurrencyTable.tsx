@@ -4,7 +4,7 @@ import { CurrencyData } from "@/types/types";
 import Loading from "@/app/dashboard/loading";
 
 interface CurrencyTableProps {
-  data: CurrencyData[];
+  data: CurrencyData[] | Record<string, CurrencyData[]>;
   columns: TableColumn<CurrencyData>[];
   totalRecords: number;
   currentPage: number;
@@ -13,6 +13,12 @@ interface CurrencyTableProps {
   onPageChange: (page: number) => void;
   onRowsPerPageChange: (rowsPerPage: number) => void;
 }
+
+const flattenGroupedData = (
+  groupedData: Record<string, CurrencyData[]>,
+): CurrencyData[] => {
+  return Object.values(groupedData).flat();
+};
 
 const CurrencyTable: React.FC<CurrencyTableProps> = ({
   data,
@@ -24,20 +30,34 @@ const CurrencyTable: React.FC<CurrencyTableProps> = ({
   onPageChange,
   onRowsPerPageChange,
 }) => {
+  const isGroupedData = !Array.isArray(data);
+  const flattenedData = isGroupedData
+    ? flattenGroupedData(data as Record<string, CurrencyData[]>)
+    : data;
+
   return (
-    <DataTable
-      columns={columns}
-      data={data}
-      progressPending={isLoading}
-      progressComponent={<Loading />}
-      pagination
-      paginationServer
-      paginationTotalRows={totalRecords}
-      paginationDefaultPage={currentPage}
-      paginationPerPage={rowsPerPage}
-      onChangePage={onPageChange}
-      onChangeRowsPerPage={onRowsPerPageChange}
-    />
+    <div>
+      {isGroupedData &&
+        Object.keys(data as Record<string, CurrencyData[]>).map((groupKey) => (
+          <h2 key={groupKey} className="my-2 text-xl font-semibold">
+            {groupKey}
+          </h2>
+        ))}
+
+      <DataTable
+        columns={columns}
+        data={flattenedData}
+        progressPending={isLoading}
+        progressComponent={<Loading />}
+        pagination
+        paginationServer
+        paginationTotalRows={totalRecords}
+        paginationDefaultPage={currentPage}
+        paginationPerPage={rowsPerPage}
+        onChangePage={onPageChange}
+        onChangeRowsPerPage={onRowsPerPageChange}
+      />
+    </div>
   );
 };
 
