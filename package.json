@@ -10,8 +10,8 @@
     "seed": "node prisma/seed.mjs",
     "test:frontend": "jest --config jest.config.ts",
     "test:backend": "jest --config jest.backend.config.ts",
-    "test": "npm run test:frontend && npm run test:backend",
-    "test:coverage": "npm run test:frontend -- --coverage && npm run test:backend -- --coverage"
+    "test:e2e": "npx playwright test",
+    "test": "npm run test:frontend && npm run test:backend"
   },
   "dependencies": {
     "@prisma/client": "^6.2.1",
