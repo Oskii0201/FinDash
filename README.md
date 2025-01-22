@@ -45,12 +45,17 @@ The **FinDash** application allows you to:
     NEXTAUTH_SECRET=your-secret-key
     NEXTAUTH_URL=host
    ```
-3.**Add environment files:**
+3.**Build and run Docker containers:**
    ```bash
     docker-compose up --build
    ```
-4.**Add environment files:**
+4.**Access the application:**
 - Open a browser and navigate to http://localhost:3000.
+- Test user:
+  ```bash
+  email: test@example.com
+  password: Test123!
+  ```
 
 **Running Tests**
 
@@ -75,3 +80,4 @@ The **FinDash** application allows you to:
    ```bash
     npm run test:e2e
    ```
+  
