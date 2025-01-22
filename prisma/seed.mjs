@@ -1,13 +1,13 @@
 import { PrismaClient } from "@prisma/client";
-import {hashSync} from "bcrypt";
+import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 
 async function main() {
   console.log("Seeding test data...");
 
-  const hashedPassword1 = hashSync("Test123!");
-  const hashedPassword2 = hashSync("Password1!");
+  const hashedPassword1 = bcrypt.hashSync("Test123!", 10);
+  const hashedPassword2 = bcrypt.hashSync("Password1!", 10);
 
   await prisma.user.createMany({
     data: [
