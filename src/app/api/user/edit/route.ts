@@ -6,7 +6,7 @@ import path from "path";
 import { v4 as uuidv4 } from "uuid";
 import { authOptions } from "@/lib/auth";
 
-const uploadDir = path.join(process.cwd(), "public/uploads/profile-pictures");
+const uploadDir = path.join(process.cwd(), "public/images");
 
 export async function POST(request: Request): Promise<NextResponse> {
   try {
@@ -53,7 +53,7 @@ export async function POST(request: Request): Promise<NextResponse> {
         await fs.unlink(oldFilePath).catch(() => {});
       }
 
-      newProfilePicture = `/uploads/profile-pictures/${filename}`;
+      newProfilePicture = `/images/${filename}`;
     }
 
     const updatedUser = await prisma.user.update({
