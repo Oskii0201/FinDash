@@ -11,6 +11,7 @@ import fetchCurrencies, {
 import { toast } from "react-toastify";
 import { format } from "date-fns";
 import { CurrencyData } from "@/types/types";
+import { exportToCSV } from "@/utils/exportToCSV";
 
 const columns = [
   {
@@ -155,6 +156,14 @@ export default function Dashboard() {
           onClick={handleUpdateData}
         >
           Fetch Currencies
+        </Button>
+        <Button
+          width="w-fit"
+          color="green"
+          additionalClasses="h-fit"
+          onClick={() => exportToCSV(data, columns, "kursy_walut")}
+        >
+          Eksportuj do CSV
         </Button>
       </div>
 
